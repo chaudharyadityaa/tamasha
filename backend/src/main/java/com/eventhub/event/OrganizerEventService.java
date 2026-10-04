@@ -8,10 +8,12 @@ import com.eventhub.common.Text;
 import com.eventhub.security.ActorVerifier;
 import com.eventhub.user.Role;
 import com.eventhub.user.User;
+import com.eventhub.venue.SeatRepository;
 import com.eventhub.venue.Venue;
 import com.eventhub.venue.VenueRepository;
 import java.time.Instant;
 import java.util.Currency;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,11 +29,17 @@ public class OrganizerEventService {
 
     private final EventRepository events;
     private final VenueRepository venues;
+    private final TicketTypeRepository ticketTypes;
+    private final SeatRepository seats;
     private final ActorVerifier actors;
 
-    public OrganizerEventService(EventRepository events, VenueRepository venues, ActorVerifier actors) {
+    public OrganizerEventService(EventRepository events, VenueRepository venues,
+                                 TicketTypeRepository ticketTypes, SeatRepository seats,
+                                 ActorVerifier actors) {
         this.events = events;
         this.venues = venues;
+        this.ticketTypes = ticketTypes;
+        this.seats = seats;
         this.actors = actors;
     }
 
@@ -84,9 +92,14 @@ public class OrganizerEventService {
     @Transactional
     public EventResponse publish(long organizerId, long eventId) {
         actors.requireRole(organizerId, Role.ORGANIZER);
-        Event event = ownEvent(organizerId, eventId);
-        if (event.getStatus() == EventStatus.DRAFT && !event.getStartsAt().isAfter(Instant.now())) {
-            throw new ConflictException("An event that has already started cannot be published");
+        // Locked, so ticket types cannot change while we check them.
+        Event event = events.findByIdAndOrganizerIdForUpdate(eventId, organizerId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+        if (event.getStatus() == EventStatus.DRAFT) {
+            if (!event.getStartsAt().isAfter(Instant.now())) {
+                throw new ConflictException("An event that has already started cannot be published");
+            }
+            requireSellable(event);
         }
         transition(event::publish);
         return EventResponse.from(event);
@@ -128,6 +141,23 @@ public class OrganizerEventService {
     private Event ownEvent(long organizerId, long eventId) {
         return events.findByIdAndOrganizerId(eventId, organizerId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
+    }
+
+    /** An event may only go on sale if customers could actually buy something. */
+    private void requireSellable(Event event) {
+        List<TicketType> types = ticketTypes.findByEventIdOrderByIdAsc(event.getId());
+        if (types.isEmpty()) {
+            throw new ConflictException("Add at least one ticket type before publishing");
+        }
+        if (event.getSeatingMode() == SeatingMode.RESERVED_SEATING) {
+            Long venueId = event.getVenue().getId();
+            for (TicketType type : types) {
+                if (!seats.existsByVenueIdAndSection(venueId, type.getSeatSection())) {
+                    throw new ConflictException(
+                            "The venue has no seats in section '" + type.getSeatSection() + "'");
+                }
+            }
+        }
     }
 
     private static void requireInTheFuture(Instant startsAt) {

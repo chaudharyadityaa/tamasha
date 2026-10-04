@@ -8,4 +8,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByVenueId(Long venueId);
 
     long countByVenueId(Long venueId);
+
+    boolean existsByVenueIdAndSection(Long venueId, String section);
 }

@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,6 +49,8 @@ class OrganizerEventControllerTest {
     private VenueRepository venues;
     @Autowired
     private EventRepository events;
+    @Autowired
+    private TicketTypeRepository ticketTypes;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -70,6 +73,11 @@ class OrganizerEventControllerTest {
     private Event saveDraft(User organizer, Venue venue, String title) {
         return events.saveAndFlush(new Event(organizer, venue, title, null, "MUSIC", null,
                 start, end, SeatingMode.GENERAL_ADMISSION, "INR"));
+    }
+    
+    private void addTicketType(Event event) {
+        ticketTypes.saveAndFlush(TicketType.generalAdmission(event, "Standing",
+                new BigDecimal("100.00"), 100, 4, null, null));
     }
 
     private String createJson(long venueId, Instant startsAt, Instant endsAt, String extra) {
@@ -178,6 +186,7 @@ class OrganizerEventControllerTest {
     void publishedEventCannotBeEditedUntilUnpublished() throws Exception {
         User organizer = saveUser(Role.ORGANIZER);
         Event event = saveDraft(organizer, saveVenue(organizer), "Concert");
+        addTicketType(event);
         action("POST", organizer, event.getId(), "/publish").andExpect(status().isOk());
 
         action("PUT", organizer, event.getId(), "").andExpect(status().isConflict());
@@ -190,6 +199,7 @@ class OrganizerEventControllerTest {
     void eventLifecycleFollowsTheAllowedTransitions() throws Exception {
         User organizer = saveUser(Role.ORGANIZER);
         Event event = saveDraft(organizer, saveVenue(organizer), "Concert");
+        addTicketType(event);
         long id = event.getId();
 
         action("POST", organizer, id, "/publish")
