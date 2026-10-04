@@ -24,4 +24,8 @@ public interface TicketTypeRepository extends JpaRepository<TicketType, Long> {
     /** Total general-admission tickets already defined for the event (0 if none). */
     @Query("select coalesce(sum(t.quantityTotal), 0L) from TicketType t where t.event.id = :eventId")
     long sumQuantityTotalByEventId(@Param("eventId") Long eventId);
+
+    /** How many ticket types, across all events at this venue, sell this seat section? */
+    @Query("select count(t) from TicketType t where t.event.venue.id = :venueId and t.seatSection = :section")
+    long countUsingSection(@Param("venueId") Long venueId, @Param("section") String section);
 }
