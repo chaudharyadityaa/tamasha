@@ -12,6 +12,7 @@ import com.eventhub.venue.SeatRepository;
 import com.eventhub.venue.Venue;
 import com.eventhub.venue.VenueRepository;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -158,6 +159,11 @@ public class OrganizerEventService {
                 }
             }
         }
+        // Ticket types are frozen while published, so this stays correct while customers can see it.
+        event.setStartingPrice(types.stream()
+                .map(TicketType::getPrice)
+                .min(Comparator.naturalOrder())
+                .orElseThrow());
     }
 
     private static void requireInTheFuture(Instant startsAt) {

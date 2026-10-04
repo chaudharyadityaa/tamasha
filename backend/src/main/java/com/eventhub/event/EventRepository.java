@@ -4,13 +4,15 @@ import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface EventRepository extends JpaRepository<Event, Long> {
+public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
 
     Page<Event> findByStatus(EventStatus status, Pageable pageable);
 
@@ -33,4 +35,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("select e from Event e where e.id = :id and e.organizer.id = :organizerId")
     Optional<Event> findByIdAndOrganizerIdForUpdate(@Param("id") Long id,
                                                     @Param("organizerId") Long organizerId);
+
+    /** Public discovery search: the Specification decides which filters apply. */
+    @Override
+    @EntityGraph(attributePaths = "venue")
+    Page<Event> findAll(Specification<Event> spec, Pageable pageable);
+
+    /** Public detail lookup: only returns the event if it has this status. */
+    @EntityGraph(attributePaths = {"venue", "organizer"})
+    Optional<Event> findByIdAndStatus(Long id, EventStatus status);
 }

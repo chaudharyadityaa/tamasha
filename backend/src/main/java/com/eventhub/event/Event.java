@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Locale;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,7 +40,7 @@ public class Event {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    // The database column is TEXT (unlimited); length is enforced by request validation later.
+    // The database column is TEXT (unlimited); length is enforced by request validation.
     @Column(name = "description")
     private String description;
 
@@ -69,6 +70,10 @@ public class Event {
 
     @Column(name = "cancellation_cutoff_hours", nullable = false)
     private int cancellationCutoffHours = 24;
+
+    /** The cheapest ticket price. Set when the event is published; used for price filter and sort. */
+    @Column(name = "starting_price", precision = 10, scale = 2)
+    private BigDecimal startingPrice;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -117,6 +122,13 @@ public class Event {
             throw new IllegalArgumentException("Cancellation cutoff cannot be negative");
         }
         this.cancellationCutoffHours = hours;
+    }
+
+    public void setStartingPrice(BigDecimal startingPrice) {
+        if (startingPrice != null && startingPrice.signum() < 0) {
+            throw new IllegalArgumentException("Starting price cannot be negative");
+        }
+        this.startingPrice = startingPrice;
     }
 
     public void publish() {
@@ -196,6 +208,10 @@ public class Event {
 
     public int getCancellationCutoffHours() {
         return cancellationCutoffHours;
+    }
+
+    public BigDecimal getStartingPrice() {
+        return startingPrice;
     }
 
     public Instant getCreatedAt() {
