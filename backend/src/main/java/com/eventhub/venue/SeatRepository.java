@@ -26,6 +26,9 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     List<Seat> findByVenueIdAndSectionIn(Long venueId, Collection<String> sections);
 
+    /** Only the requested seats that really belong to this venue. */
+    List<Seat> findByIdInAndVenueId(Collection<Long> ids, Long venueId);
+
     @Query("""
             select s.section as section, count(s) as seatCount, count(distinct s.rowLabel) as rowCount
             from Seat s

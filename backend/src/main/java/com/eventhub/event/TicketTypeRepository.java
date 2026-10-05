@@ -3,6 +3,7 @@ package com.eventhub.event;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,4 +29,23 @@ public interface TicketTypeRepository extends JpaRepository<TicketType, Long> {
     /** How many ticket types, across all events at this venue, sell this seat section? */
     @Query("select count(t) from TicketType t where t.event.venue.id = :venueId and t.seatSection = :section")
     long countUsingSection(@Param("venueId") Long venueId, @Param("section") String section);
+
+    /**
+     * Atomically claims tickets: succeeds (returns 1) only if enough are left. Because this is one
+     * statement, concurrent bookings take turns on the row and can never oversell.
+     * "Sold" includes tickets that are held by unpaid bookings.
+     */
+    @Modifying
+    @Query("""
+            update TicketType t set t.quantitySold = t.quantitySold + :quantity
+            where t.id = :id and t.quantityTotal is not null
+              and t.quantityTotal - t.quantitySold >= :quantity
+            """)
+    int reserveQuantity(@Param("id") Long id, @Param("quantity") int quantity);
+
+    /** Gives tickets back (booking cancelled or hold expired). Returns 0 if the counter would go negative. */
+    @Modifying
+    @Query("update TicketType t set t.quantitySold = t.quantitySold - :quantity "
+            + "where t.id = :id and t.quantitySold >= :quantity")
+    int releaseQuantity(@Param("id") Long id, @Param("quantity") int quantity);
 }

@@ -1,5 +1,6 @@
 package com.eventhub.seating;
 
+import com.eventhub.booking.BookingSeatRepository;
 import com.eventhub.common.BadRequestException;
 import com.eventhub.common.NotFoundException;
 import com.eventhub.event.Event;
@@ -13,6 +14,7 @@ import com.eventhub.venue.Seat;
 import com.eventhub.venue.SeatRepository;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,11 +35,14 @@ public class SeatMapService {
     private final EventRepository events;
     private final TicketTypeRepository ticketTypes;
     private final SeatRepository seats;
+    private final BookingSeatRepository bookingSeats;
 
-    public SeatMapService(EventRepository events, TicketTypeRepository ticketTypes, SeatRepository seats) {
+    public SeatMapService(EventRepository events, TicketTypeRepository ticketTypes,
+                          SeatRepository seats, BookingSeatRepository bookingSeats) {
         this.events = events;
         this.ticketTypes = ticketTypes;
         this.seats = seats;
+        this.bookingSeats = bookingSeats;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +63,10 @@ public class SeatMapService {
                         .collect(Collectors.groupingBy(Seat::getSection));
 
         Instant now = Instant.now();
+        // Expired unpaid holds are not in this list, so those seats show as AVAILABLE again.
+        Set<Long> booked = new HashSet<>(bookingSeats.findConfirmedSeatIds(eventId));
+        Set<Long> held = new HashSet<>(bookingSeats.findHeldSeatIds(eventId, now));
+
         List<SeatMapResponse.Section> sections = types.stream()
                 .map(type -> new SeatMapResponse.Section(
                         type.getId(), type.getName(), type.getSeatSection(), type.getPrice(),
@@ -66,7 +75,9 @@ public class SeatMapService {
                                 .sorted(SEAT_ORDER)
                                 .map(seat -> new SeatMapResponse.SeatView(
                                         seat.getId(), seat.getRowLabel(), seat.getSeatNumber(),
-                                        SeatStatus.AVAILABLE)) // bookings will change this
+                                        booked.contains(seat.getId()) ? SeatStatus.BOOKED
+                                                : held.contains(seat.getId()) ? SeatStatus.HELD
+                                                : SeatStatus.AVAILABLE))
                                 .toList()))
                 .toList();
         return new SeatMapResponse(eventId, event.getCurrency(), sections);

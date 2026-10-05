@@ -25,4 +25,11 @@ public class ActorVerifier {
                 .filter(user -> user.getRole() == role)
                 .orElseThrow(() -> new AccessDeniedException("Insufficient permissions"));
     }
+
+    /** Any role is fine, but the account must still exist and be enabled. */
+    public User requireActive(long userId) {
+        return users.findById(userId)
+                .filter(User::isEnabled)
+                .orElseThrow(() -> new AccessDeniedException("Account is not available"));
+    }
 }

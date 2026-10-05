@@ -1,7 +1,9 @@
 package com.eventhub.seating;
 
-/** BOOKED is filled in by the booking checkpoint; until then every seat is AVAILABLE. */
 public enum SeatStatus {
     AVAILABLE,
+    /** Held by an unpaid booking whose hold has not expired. */
+    HELD,
+    /** Part of a confirmed booking. */
     BOOKED
 }
