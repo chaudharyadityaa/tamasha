@@ -28,13 +28,21 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     Optional<Event> findByIdAndOrganizerId(Long id, Long organizerId);
 
     /**
-     * Same lookup, but locks the row (SELECT ... FOR UPDATE) until the transaction ends.
+     * Same lookup, but locks the row exclusively (SELECT ... FOR UPDATE) until the transaction ends.
      * Other transactions that try to lock this event wait their turn.
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from Event e where e.id = :id and e.organizer.id = :organizerId")
     Optional<Event> findByIdAndOrganizerIdForUpdate(@Param("id") Long id,
                                                     @Param("organizerId") Long organizerId);
+
+    /**
+     * Used when booking: a SHARED lock (FOR SHARE). Any number of bookings can hold it together, but
+     * an organizer's cancel/unpublish (exclusive lock) waits for them, and they wait for it.
+     */
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    @Query("select e from Event e where e.id = :id and e.status = :status")
+    Optional<Event> findByIdAndStatusForShare(@Param("id") Long id, @Param("status") EventStatus status);
 
     /** Public discovery search: the Specification decides which filters apply. */
     @Override

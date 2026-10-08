@@ -20,11 +20,14 @@ public class TicketTypeService {
     private final EventRepository events;
     private final TicketTypeRepository ticketTypes;
     private final ActorVerifier actors;
+    private final BookingGateway bookings;
 
-    public TicketTypeService(EventRepository events, TicketTypeRepository ticketTypes, ActorVerifier actors) {
+    public TicketTypeService(EventRepository events, TicketTypeRepository ticketTypes,
+                             ActorVerifier actors, BookingGateway bookings) {
         this.events = events;
         this.ticketTypes = ticketTypes;
         this.actors = actors;
+        this.bookings = bookings;
     }
 
     @Transactional
@@ -81,7 +84,11 @@ public class TicketTypeService {
         lockedDraftEvent(organizerId, eventId);
         TicketType type = ticketTypes.findByIdAndEventId(ticketTypeId, eventId)
                 .orElseThrow(() -> new NotFoundException("Ticket type not found"));
-        ticketTypes.delete(type); // safe: a draft event cannot have bookings yet
+        if (bookings.isTicketTypeUsed(ticketTypeId)) {
+            throw new ConflictException(
+                    "This ticket type appears in bookings (even cancelled ones) and cannot be deleted");
+        }
+        ticketTypes.delete(type);
     }
 
     private Event lockedDraftEvent(long organizerId, long eventId) {

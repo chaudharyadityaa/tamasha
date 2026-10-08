@@ -33,15 +33,17 @@ public class OrganizerEventService {
     private final TicketTypeRepository ticketTypes;
     private final SeatRepository seats;
     private final ActorVerifier actors;
+    private final BookingGateway bookings;
 
     public OrganizerEventService(EventRepository events, VenueRepository venues,
                                  TicketTypeRepository ticketTypes, SeatRepository seats,
-                                 ActorVerifier actors) {
+                                 ActorVerifier actors, BookingGateway bookings) {
         this.events = events;
         this.venues = venues;
         this.ticketTypes = ticketTypes;
         this.seats = seats;
         this.actors = actors;
+        this.bookings = bookings;
     }
 
     @Transactional
@@ -94,8 +96,7 @@ public class OrganizerEventService {
     public EventResponse publish(long organizerId, long eventId) {
         actors.requireRole(organizerId, Role.ORGANIZER);
         // Locked, so ticket types cannot change while we check them.
-        Event event = events.findByIdAndOrganizerIdForUpdate(eventId, organizerId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+        Event event = lockedOwnEvent(organizerId, eventId);
         if (event.getStatus() == EventStatus.DRAFT) {
             if (!event.getStartsAt().isAfter(Instant.now())) {
                 throw new ConflictException("An event that has already started cannot be published");
@@ -109,7 +110,12 @@ public class OrganizerEventService {
     @Transactional
     public EventResponse unpublish(long organizerId, long eventId) {
         actors.requireRole(organizerId, Role.ORGANIZER);
-        Event event = ownEvent(organizerId, eventId);
+        // Exclusive lock: bookings that are being created finish first, new ones wait for us.
+        Event event = lockedOwnEvent(organizerId, eventId);
+        if (event.getStatus() == EventStatus.PUBLISHED && bookings.hasActiveBookings(eventId)) {
+            throw new ConflictException("This event has active bookings. Cancel the event instead, "
+                    + "or wait until its bookings are cancelled or expire.");
+        }
         transition(event::unpublish);
         return EventResponse.from(event);
     }
@@ -117,8 +123,10 @@ public class OrganizerEventService {
     @Transactional
     public EventResponse cancel(long organizerId, long eventId) {
         actors.requireRole(organizerId, Role.ORGANIZER);
-        Event event = ownEvent(organizerId, eventId);
-        transition(event::cancel); // later: also cancels the event's bookings and releases seats
+        Event event = lockedOwnEvent(organizerId, eventId);
+        transition(event::cancel);
+        // Everyone who booked is cancelled and (demo-)refunded; seats and tickets are released.
+        bookings.cancelAllBookings(eventId);
         return EventResponse.from(event);
     }
 
@@ -141,6 +149,11 @@ public class OrganizerEventService {
 
     private Event ownEvent(long organizerId, long eventId) {
         return events.findByIdAndOrganizerId(eventId, organizerId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+    }
+
+    private Event lockedOwnEvent(long organizerId, long eventId) {
+        return events.findByIdAndOrganizerIdForUpdate(eventId, organizerId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
     }
 

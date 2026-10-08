@@ -2,6 +2,7 @@ package com.eventhub.booking;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -96,4 +97,60 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                    or (b.status = com.eventhub.booking.BookingStatus.PENDING_PAYMENT and b.expiresAt <= :now))
             """)
     Page<Booking> findCancelledOrExpired(@Param("userId") Long userId, @Param("now") Instant now, Pageable pageable);
+
+    // ---- Organizer guards, cancel-all and statistics ----
+
+    /** Confirmed bookings, or unpaid ones whose hold has not run out. */
+    @Query("""
+            select count(b) from Booking b
+            where b.event.id = :eventId
+              and (b.status = com.eventhub.booking.BookingStatus.CONFIRMED
+                   or (b.status = com.eventhub.booking.BookingStatus.PENDING_PAYMENT and b.expiresAt > :now))
+            """)
+    long countActiveForEvent(@Param("eventId") Long eventId, @Param("now") Instant now);
+
+    /** Every unpaid or confirmed booking of the event, locked so they cannot change underneath us. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select b from Booking b
+            where b.event.id = :eventId
+              and b.status in (com.eventhub.booking.BookingStatus.PENDING_PAYMENT,
+                               com.eventhub.booking.BookingStatus.CONFIRMED)
+            order by b.id
+            """)
+    List<Booking> findOpenForEventForUpdate(@Param("eventId") Long eventId);
+
+    /** All bookings of an event, with the customer loaded (for the organizer's list). */
+    @EntityGraph(attributePaths = "user")
+    Page<Booking> findByEventId(Long eventId, Pageable pageable);
+
+    @Query("select b.status, count(b) from Booking b where b.event.id = :eventId group by b.status")
+    List<Object[]> countByStatusForEvent(@Param("eventId") Long eventId);
+
+    /** Null when there are no confirmed bookings. */
+    @Query("select sum(b.totalAmount) from Booking b where b.event.id = :eventId "
+            + "and b.status = com.eventhub.booking.BookingStatus.CONFIRMED")
+    BigDecimal sumConfirmedRevenue(@Param("eventId") Long eventId);
+
+    /** Rows of [ticketTypeId, status, total quantity] for confirmed and still-held general-admission lines. */
+    @Query("""
+            select i.ticketType.id, b.status, sum(i.quantity)
+            from BookingItem i join i.booking b
+            where b.event.id = :eventId
+              and (b.status = com.eventhub.booking.BookingStatus.CONFIRMED
+                   or (b.status = com.eventhub.booking.BookingStatus.PENDING_PAYMENT and b.expiresAt > :now))
+            group by i.ticketType.id, b.status
+            """)
+    List<Object[]> sumItemQuantities(@Param("eventId") Long eventId, @Param("now") Instant now);
+
+    /** Rows of [ticketTypeId, status, seat count] for confirmed and still-held reserved seats. */
+    @Query("""
+            select s.ticketType.id, b.status, count(s)
+            from BookingSeat s join s.booking b
+            where s.event.id = :eventId and s.releasedAt is null
+              and (b.status = com.eventhub.booking.BookingStatus.CONFIRMED
+                   or (b.status = com.eventhub.booking.BookingStatus.PENDING_PAYMENT and b.expiresAt > :now))
+            group by s.ticketType.id, b.status
+            """)
+    List<Object[]> countSeatClaims(@Param("eventId") Long eventId, @Param("now") Instant now);
 }

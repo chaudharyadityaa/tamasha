@@ -109,7 +109,7 @@ public class BookingService {
 
         Instant now = Instant.now();
         // Drafts, cancelled and unknown events all look the same: not found.
-        Event event = events.findByIdAndStatus(request.eventId(), EventStatus.PUBLISHED)
+        Event event = events.findByIdAndStatusForShare(request.eventId(), EventStatus.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
         if (!event.getStartsAt().isAfter(now)) {
             throw new ConflictException("This event has already started");

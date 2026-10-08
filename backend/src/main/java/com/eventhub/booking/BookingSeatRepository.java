@@ -11,6 +11,8 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
 
     List<BookingSeat> findByBookingId(Long bookingId);
 
+    boolean existsByTicketTypeId(Long ticketTypeId);
+
     /** Seats currently claimed (not released) for the event. */
     long countByEventIdAndReleasedAtIsNull(Long eventId);
 

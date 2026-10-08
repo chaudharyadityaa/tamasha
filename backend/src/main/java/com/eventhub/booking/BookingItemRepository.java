@@ -1,0 +1,8 @@
+package com.eventhub.booking;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BookingItemRepository extends JpaRepository<BookingItem, Long> {
+
+    boolean existsByTicketTypeId(Long ticketTypeId);
+}
