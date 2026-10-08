@@ -18,11 +18,14 @@ public class DemoPaymentService {
 
     private final BookingRepository bookings;
     private final PaymentRepository payments;
+    private final TicketIssuer ticketIssuer;
     private final ActorVerifier actors;
 
-    public DemoPaymentService(BookingRepository bookings, PaymentRepository payments, ActorVerifier actors) {
+    public DemoPaymentService(BookingRepository bookings, PaymentRepository payments,
+                              TicketIssuer ticketIssuer, ActorVerifier actors) {
         this.bookings = bookings;
         this.payments = payments;
+        this.ticketIssuer = ticketIssuer;
         this.actors = actors;
     }
 
@@ -47,6 +50,7 @@ public class DemoPaymentService {
 
         Payment payment = payments.save(Payment.demoSuccess(booking));
         booking.confirm(now);
+        ticketIssuer.issue(booking); // tickets exist only for paid bookings
         return BookingResponse.from(booking, payment);
     }
 }

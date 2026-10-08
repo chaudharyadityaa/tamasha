@@ -15,19 +15,23 @@ public class BookingLifecycleService {
     private final BookingRepository bookings;
     private final PaymentRepository payments;
     private final BookingInventory inventory;
+    private final TicketIssuer ticketIssuer;
     private final ActorVerifier actors;
 
     public BookingLifecycleService(BookingRepository bookings, PaymentRepository payments,
-                                   BookingInventory inventory, ActorVerifier actors) {
+                                   BookingInventory inventory, TicketIssuer ticketIssuer,
+                                   ActorVerifier actors) {
         this.bookings = bookings;
         this.payments = payments;
         this.inventory = inventory;
+        this.ticketIssuer = ticketIssuer;
         this.actors = actors;
     }
 
     /**
      * Cancels the customer's own booking. Unpaid bookings can always be cancelled; paid ones only
-     * until the event's cancellation cutoff. Seats and general-admission tickets are released.
+     * until the event's cancellation cutoff. Seats and general-admission tickets are released,
+     * and any issued tickets become void.
      */
     @Transactional
     public BookingResponse cancel(long userId, long bookingId) {
@@ -50,6 +54,7 @@ public class BookingLifecycleService {
 
         booking.cancel(now); // also releases the reserved seats
         inventory.releaseItems(booking);
+        ticketIssuer.voidAll(booking);
         if (wasPaid) {
             payments.findFirstByBookingIdAndStatus(bookingId, PaymentStatus.SUCCEEDED)
                     .ifPresent(Payment::markRefunded); // a DEMO refund: no money actually moves

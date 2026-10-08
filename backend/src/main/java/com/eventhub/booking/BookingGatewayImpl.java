@@ -16,15 +16,17 @@ public class BookingGatewayImpl implements BookingGateway {
     private final BookingSeatRepository seats;
     private final PaymentRepository payments;
     private final BookingInventory inventory;
+    private final TicketIssuer ticketIssuer;
 
     public BookingGatewayImpl(BookingRepository bookings, BookingItemRepository items,
                               BookingSeatRepository seats, PaymentRepository payments,
-                              BookingInventory inventory) {
+                              BookingInventory inventory, TicketIssuer ticketIssuer) {
         this.bookings = bookings;
         this.items = items;
         this.seats = seats;
         this.payments = payments;
         this.inventory = inventory;
+        this.ticketIssuer = ticketIssuer;
     }
 
     @Override
@@ -49,6 +51,7 @@ public class BookingGatewayImpl implements BookingGateway {
             boolean wasPaid = booking.getStatus() == BookingStatus.CONFIRMED;
             booking.cancel(now);                       // also releases the reserved seats
             inventory.releaseItems(booking);           // returns general-admission tickets
+            ticketIssuer.voidAll(booking);             // tickets can no longer be used
             if (wasPaid) {
                 payments.findFirstByBookingIdAndStatus(booking.getId(), PaymentStatus.SUCCEEDED)
                         .ifPresent(Payment::markRefunded); // a DEMO refund: no money actually moves
