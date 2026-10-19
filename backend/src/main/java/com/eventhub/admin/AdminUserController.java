@@ -1,7 +1,8 @@
 package com.eventhub.admin;
 
 import com.eventhub.common.PageResponse;
-import com.eventhub.user.UserResponse;
+import com.eventhub.security.CurrentUser;
+import com.eventhub.user.Role;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -24,21 +25,24 @@ public class AdminUserController {
     }
 
     @GetMapping
-    public PageResponse<UserResponse> list(@AuthenticationPrincipal Jwt jwt,
-                                           @RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "20") int size) {
-        return adminUserService.list(actingUserId(jwt), page, size);
+    public PageResponse<AdminUserResponse> list(@AuthenticationPrincipal Jwt jwt,
+                                                @RequestParam(required = false) Role role,
+                                                @RequestParam(required = false) Boolean enabled,
+                                                @RequestParam(required = false) String q,
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "20") int size) {
+        return adminUserService.list(CurrentUser.id(jwt), role, enabled, q, page, size);
     }
 
     @PutMapping("/{id}/role")
-    public UserResponse changeRole(@AuthenticationPrincipal Jwt jwt,
-                                   @PathVariable long id,
-                                   @Valid @RequestBody ChangeRoleRequest request) {
-        return adminUserService.changeRole(actingUserId(jwt), id, request.role());
+    public AdminUserResponse changeRole(@AuthenticationPrincipal Jwt jwt, @PathVariable long id,
+                                        @Valid @RequestBody ChangeRoleRequest request) {
+        return adminUserService.changeRole(CurrentUser.id(jwt), id, request.role());
     }
 
-    /** The acting user always comes from the verified token, never from the request. */
-    private long actingUserId(Jwt jwt) {
-        return Long.parseLong(jwt.getSubject());
+    @PutMapping("/{id}/enabled")
+    public AdminUserResponse setEnabled(@AuthenticationPrincipal Jwt jwt, @PathVariable long id,
+                                        @Valid @RequestBody ChangeEnabledRequest request) {
+        return adminUserService.setEnabled(CurrentUser.id(jwt), id, request.enabled());
     }
 }
