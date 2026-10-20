@@ -1,6 +1,9 @@
 package com.eventhub.auth;
 
+import com.eventhub.common.UnauthorizedException;
+import com.eventhub.security.AuthRateLimiter;
 import com.eventhub.user.UserResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,19 +20,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final AuthRateLimiter rateLimiter;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, AuthRateLimiter rateLimiter) {
         this.authService = authService;
+        this.rateLimiter = rateLimiter;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request,
+                                                 HttpServletRequest http) {
+        rateLimiter.checkAndRecordRegistration(http.getRemoteAddr());
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping("/login")
-    public TokenResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.login(request);
+    public TokenResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest http) {
+        String clientIp = http.getRemoteAddr();
+        rateLimiter.checkLoginAllowed(clientIp, request.email());
+        try {
+            TokenResponse response = authService.login(request);
+            rateLimiter.recordLoginSuccess(clientIp, request.email());
+            return response;
+        } catch (UnauthorizedException e) {
+            rateLimiter.recordLoginFailure(clientIp, request.email());
+            throw e;
+        }
     }
 
     /** Returns the logged-in user. The id comes from the verified token, never from the client. */
