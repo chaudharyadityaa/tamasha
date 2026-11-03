@@ -1,0 +1,43 @@
+import { useId } from 'react'
+import type { InputHTMLAttributes } from 'react'
+
+interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
+  label: string
+  error?: string | null
+  hint?: string
+}
+
+export function TextField({ label, error, hint, className = '', ...rest }: TextFieldProps) {
+  const id = useId()
+  const hintId = `${id}-hint`
+  const errorId = `${id}-error`
+  const showHint = Boolean(hint) && !error
+  const describedBy = [showHint ? hintId : null, error ? errorId : null].filter(Boolean).join(' ') || undefined
+
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-slate-700">
+        {label}
+      </label>
+      <input
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy}
+        className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+          error ? 'border-red-500' : 'border-slate-300'
+        } ${className}`}
+        {...rest}
+      />
+      {showHint && (
+        <p id={hintId} className="mt-1 text-xs text-slate-500">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={errorId} className="mt-1 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
