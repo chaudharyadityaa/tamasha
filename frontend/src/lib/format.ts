@@ -1,13 +1,32 @@
+const LOCALE = 'en-IN'
+
 export function formatMoney(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency }).format(amount)
+  return new Intl.NumberFormat(LOCALE, { style: 'currency', currency }).format(amount)
 }
 
-/** Shows the event time in the venue's own time zone, whatever zone the visitor is in. */
+/** Shows a moment in the venue's own time zone, whatever zone the visitor is in. */
 export function formatDateTime(iso: string, timeZone: string): string {
   const date = new Date(iso)
   try {
-    return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(date)
+    return new Intl.DateTimeFormat(LOCALE, { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(date)
   } catch {
-    return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }).format(date)
+    return new Intl.DateTimeFormat(LOCALE, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }).format(date)
   }
+}
+
+/** "Saturday, 10 January 2027, 7:00 pm – 10:00 pm" for one-day events, or both full dates otherwise. */
+export function formatDateRange(startIso: string, endIso: string, timeZone: string): string {
+  const start = new Date(startIso)
+  const end = new Date(endIso)
+  try {
+    const day = new Intl.DateTimeFormat(LOCALE, { dateStyle: 'full', timeZone })
+    const time = new Intl.DateTimeFormat(LOCALE, { hour: 'numeric', minute: '2-digit', timeZone })
+    if (day.format(start) === day.format(end)) {
+      return `${day.format(start)}, ${time.format(start)} – ${time.format(end)}`
+    }
+  } catch {
+    // Unknown time zone: fall through to the UTC fallback below.
+    return `${formatDateTime(startIso, 'UTC')} – ${formatDateTime(endIso, 'UTC')}`
+  }
+  return `${formatDateTime(startIso, timeZone)} – ${formatDateTime(endIso, timeZone)}`
 }

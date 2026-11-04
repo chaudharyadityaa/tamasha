@@ -60,6 +60,46 @@ export interface EventSearchParams {
   size?: number
 }
 
+export type SeatingMode = 'GENERAL_ADMISSION' | 'RESERVED_SEATING'
+
+export interface VenueInfo {
+  name: string
+  addressLine: string
+  city: string
+  region: string | null
+  country: string
+  timeZone: string
+}
+
+export interface PublicTicketType {
+  id: number
+  name: string
+  price: number
+  /** Null for reserved-seating types (seat availability comes from the seat map). */
+  quantityRemaining: number | null
+  seatSection: string | null
+  maxPerBooking: number
+  salesStart: string | null
+  salesEnd: string | null
+  onSale: boolean
+}
+
+export interface EventDetail {
+  id: number
+  title: string
+  description: string | null
+  category: string
+  imageUrl: string | null
+  startsAt: string
+  endsAt: string
+  seatingMode: SeatingMode
+  currency: string
+  cancellationCutoffHours: number
+  organizerName: string
+  venue: VenueInfo
+  ticketTypes: PublicTicketType[]
+}
+
 /** The error format the backend uses for every failure (RFC 9457 problem detail). */
 export interface ProblemDetail {
   title?: string

@@ -20,7 +20,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const closeMenu = () => setMenuOpen(false)
 
-  const items: NavItem[] = [{ to: '/', label: 'Events', end: true }]
+  const items: NavItem[] = [{ to: '/events', label: 'Events', end: false }]
   if (user) {
     items.push({ to: '/my-bookings', label: 'My bookings', end: false })
   }

@@ -3,6 +3,8 @@ import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth, RequireRole } from './auth/guards'
 import { AppLayout } from './components/layout/AppLayout'
 import { AccessDeniedPage } from './pages/AccessDeniedPage'
+import { EventDetailPage } from './pages/EventDetailPage'
+import { EventsPage } from './pages/EventsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
@@ -16,12 +18,10 @@ export default function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<HomePage />} />
+            <Route path="events" element={<EventsPage />} />
+            <Route path="events/:id" element={<EventDetailPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
-            <Route
-              path="events/:id"
-              element={<PlaceholderPage title="Event details" description="The event page arrives in the next checkpoint." />}
-            />
             <Route
               path="my-bookings"
               element={
