@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { PublicTicketType } from '../../api/types'
 import { formatDateTime, formatMoney } from '../../lib/format'
 import { Badge } from '../ui/Badge'
@@ -6,6 +7,8 @@ interface TicketTypeListProps {
   ticketTypes: PublicTicketType[]
   currency: string
   timeZone: string
+  /** Optional extra content under each ticket type, such as a quantity stepper. */
+  renderAction?: (ticket: PublicTicketType) => ReactNode
 }
 
 function availability(ticket: PublicTicketType): { label: string; tone: 'success' | 'warning' | 'danger' | 'info' } {
@@ -31,7 +34,7 @@ function salesStatus(ticket: PublicTicketType, timeZone: string): string | null 
   return 'Sales closed'
 }
 
-export function TicketTypeList({ ticketTypes, currency, timeZone }: TicketTypeListProps) {
+export function TicketTypeList({ ticketTypes, currency, timeZone, renderAction }: TicketTypeListProps) {
   if (ticketTypes.length === 0) {
     return <p className="text-sm text-slate-500">No tickets are available for this event.</p>
   }
@@ -56,6 +59,7 @@ export function TicketTypeList({ ticketTypes, currency, timeZone }: TicketTypeLi
               <span className="text-xs text-slate-500">Up to {ticket.maxPerBooking} per booking</span>
             </div>
             {status && <p className="mt-2 text-xs font-medium text-amber-700">{status}</p>}
+            {renderAction?.(ticket)}
           </li>
         )
       })}

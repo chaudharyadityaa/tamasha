@@ -3,6 +3,7 @@ import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth, RequireRole } from './auth/guards'
 import { AppLayout } from './components/layout/AppLayout'
 import { AccessDeniedPage } from './pages/AccessDeniedPage'
+import { BookingPage } from './pages/BookingPage'
 import { EventDetailPage } from './pages/EventDetailPage'
 import { EventsPage } from './pages/EventsPage'
 import { HomePage } from './pages/HomePage'
@@ -22,6 +23,14 @@ export default function App() {
             <Route path="events/:id" element={<EventDetailPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
+            <Route
+              path="bookings/:id"
+              element={
+                <RequireAuth>
+                  <BookingPage />
+                </RequireAuth>
+              }
+            />
             <Route
               path="my-bookings"
               element={

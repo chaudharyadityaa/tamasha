@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, ExternalLink, MapPin, User } from 'lucide-react'
-import { TicketTypeList } from '../components/events/TicketTypeList'
+import { BookingPanel } from '../components/events/BookingPanel'
 import { Alert } from '../components/ui/Alert'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
@@ -131,12 +131,8 @@ export function EventDetailPage() {
               Tickets
             </h2>
             <div className="mt-3">
-              <TicketTypeList ticketTypes={event.ticketTypes} currency={event.currency} timeZone={venue.timeZone} />
+              <BookingPanel event={event} onStale={() => setReloads((count) => count + 1)} />
             </div>
-            <Button className="mt-4 w-full" disabled>
-              Book tickets
-            </Button>
-            <p className="mt-2 text-xs text-slate-500">Booking opens in the next update.</p>
             <p className="mt-3 text-xs text-slate-500">{cancellationNote(event.cancellationCutoffHours)}</p>
           </aside>
         </div>
