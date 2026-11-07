@@ -7,7 +7,7 @@ import { ApiError } from '../../api/errors'
 import type { EventDetail } from '../../api/types'
 import { AuthContext } from '../../auth/authContext'
 import type { AuthContextValue } from '../../auth/authContext'
-import { authContext, loggedIn, makeBooking, makeEvent } from '../../test/fixtures'
+import { authContext, loggedIn, makeBooking, makeEvent, makeReservedEvent } from '../../test/fixtures'
 import { BookingPanel } from './BookingPanel'
 
 vi.mock('../../api/bookings', () => ({
@@ -110,10 +110,9 @@ describe('BookingPanel', () => {
     expect(createBooking).not.toHaveBeenCalled()
   })
 
-  it('tells people that seat selection is coming for reserved-seating events', () => {
-    renderPanel(makeEvent({ seatingMode: 'RESERVED_SEATING' }), loggedIn())
+  it('links reserved-seating events to the seat map', () => {
+    renderPanel(makeReservedEvent(), loggedIn())
 
-    expect(screen.getByRole('button', { name: 'Choose seats' })).toBeDisabled()
-    expect(screen.getByText('Seat selection arrives in the next update.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Choose seats' })).toHaveAttribute('href', '/events/7/seats')
   })
 })

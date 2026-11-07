@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { createBooking } from '../../api/bookings'
 import { toApiError, userMessage } from '../../api/errors'
 import type { EventDetail, PublicTicketType } from '../../api/types'
@@ -94,13 +94,23 @@ export function BookingPanel({ event, onStale }: BookingPanelProps) {
   }
 
   if (event.seatingMode === 'RESERVED_SEATING') {
+    const anyOnSale = event.ticketTypes.some((ticket) => ticket.onSale)
     return (
       <div>
         <TicketTypeList ticketTypes={event.ticketTypes} currency={event.currency} timeZone={event.venue.timeZone} />
-        <Button className="mt-4 w-full" disabled>
-          Choose seats
-        </Button>
-        <p className="mt-2 text-xs text-slate-500">Seat selection arrives in the next update.</p>
+        {anyOnSale ? (
+          <Link
+            to={`/events/${event.id}/seats`}
+            className="mt-4 block rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+          >
+            Choose seats
+          </Link>
+        ) : (
+          <Button className="mt-4 w-full" disabled>
+            Sales not open
+          </Button>
+        )}
+        <p className="mt-2 text-xs text-slate-500">Pick your exact seats on the seat map.</p>
       </div>
     )
   }
