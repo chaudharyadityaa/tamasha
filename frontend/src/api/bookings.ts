@@ -1,11 +1,20 @@
 import { http } from './client'
-import type { Booking, CreateBookingRequest } from './bookingTypes'
+import type { Booking, BookingSummary, CreateBookingRequest, MyBookingsParams } from './bookingTypes'
+import type { PageResponse } from './types'
 
 /** The same Idempotency-Key always gives back the same booking, so a retry never books twice. */
 export async function createBooking(request: CreateBookingRequest, idempotencyKey: string): Promise<Booking> {
   const { data } = await http.post<Booking>('/api/bookings', request, {
     headers: { 'Idempotency-Key': idempotencyKey },
   })
+  return data
+}
+
+export async function listMyBookings(
+  params: MyBookingsParams,
+  signal?: AbortSignal,
+): Promise<PageResponse<BookingSummary>> {
+  const { data } = await http.get<PageResponse<BookingSummary>>('/api/bookings/my', { params, signal })
   return data
 }
 

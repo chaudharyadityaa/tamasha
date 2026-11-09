@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Clock } from 'lucide-react'
 import { cancelBooking, payWithDemo } from '../api/bookings'
-import type { Booking, BookingStatus } from '../api/bookingTypes'
+import type { Booking } from '../api/bookingTypes'
 import { toApiError, userMessage } from '../api/errors'
 import { Alert } from '../components/ui/Alert'
 import { Badge } from '../components/ui/Badge'
@@ -10,15 +10,9 @@ import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { useBooking } from '../hooks/useBooking'
 import { useNowSeconds } from '../hooks/useNowSeconds'
+import { BOOKING_STATUS } from '../lib/bookingStatus'
 import { formatCountdown } from '../lib/countdown'
 import { formatLocalDateTime, formatMoney } from '../lib/format'
-
-const STATUS: Record<BookingStatus, { label: string; tone: 'warning' | 'success' | 'neutral' | 'danger' }> = {
-  PENDING_PAYMENT: { label: 'Awaiting payment', tone: 'warning' },
-  CONFIRMED: { label: 'Confirmed', tone: 'success' },
-  CANCELLED: { label: 'Cancelled', tone: 'neutral' },
-  EXPIRED: { label: 'Expired', tone: 'danger' },
-}
 
 function actionMessage(error: unknown, action: 'pay' | 'cancel'): string {
   if (action === 'pay' && toApiError(error).status === 404) {
@@ -92,7 +86,7 @@ function BookingView({ id }: { id: string }) {
   const remaining = pending ? Math.max(0, Math.floor(new Date(current.expiresAt).getTime() / 1000) - nowSeconds) : 0
   const holdExpired = pending && remaining === 0
   const canCancel = (pending && !holdExpired) || confirmed
-  const status = STATUS[current.status]
+  const status = BOOKING_STATUS[current.status]
   const note = paymentNote(current)
   const payLabel =
     current.totalAmount === 0
@@ -203,7 +197,12 @@ function BookingView({ id }: { id: string }) {
         <div className="mt-6">
           <Alert variant="success">
             <p className="font-semibold">Booking confirmed</p>
-            <p className="mt-1">Your tickets with QR codes will appear here in a later update.</p>
+            <p className="mt-1">
+              <Link to={`/bookings/${current.id}/tickets`} className="font-medium underline">
+                View your tickets
+              </Link>{' '}
+              and show the QR code at the entrance.
+            </p>
           </Alert>
         </div>
       )}

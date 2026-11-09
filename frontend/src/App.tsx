@@ -4,10 +4,12 @@ import { RequireAuth, RequireRole } from './auth/guards'
 import { AppLayout } from './components/layout/AppLayout'
 import { AccessDeniedPage } from './pages/AccessDeniedPage'
 import { BookingPage } from './pages/BookingPage'
+import { BookingTicketsPage } from './pages/BookingTicketsPage'
 import { EventDetailPage } from './pages/EventDetailPage'
 import { EventsPage } from './pages/EventsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { MyBookingsPage } from './pages/MyBookingsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -34,10 +36,18 @@ export default function App() {
               }
             />
             <Route
+              path="bookings/:id/tickets"
+              element={
+                <RequireAuth>
+                  <BookingTicketsPage />
+                </RequireAuth>
+              }
+            />
+            <Route
               path="my-bookings"
               element={
                 <RequireAuth>
-                  <PlaceholderPage title="My bookings" description="Your bookings and tickets will appear here." />
+                  <MyBookingsPage />
                 </RequireAuth>
               }
             />
