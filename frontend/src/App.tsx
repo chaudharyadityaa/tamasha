@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth, RequireRole } from './auth/guards'
 import { AppLayout } from './components/layout/AppLayout'
@@ -11,6 +11,10 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyBookingsPage } from './pages/MyBookingsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage'
+import { OrganizerEventFormPage } from './pages/OrganizerEventFormPage'
+import { OrganizerEventPage } from './pages/OrganizerEventPage'
+import { OrganizerVenuesPage } from './pages/OrganizerVenuesPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SeatSelectionPage } from './pages/SeatSelectionPage'
@@ -52,13 +56,19 @@ export default function App() {
               }
             />
             <Route
-              path="organizer/*"
+              path="organizer"
               element={
                 <RequireRole roles={['ORGANIZER']}>
-                  <PlaceholderPage title="Organizer dashboard" description="Event management arrives in a later checkpoint." />
+                  <Outlet />
                 </RequireRole>
               }
-            />
+            >
+              <Route index element={<OrganizerDashboardPage />} />
+              <Route path="venues" element={<OrganizerVenuesPage />} />
+              <Route path="events/new" element={<OrganizerEventFormPage mode="create" />} />
+              <Route path="events/:id" element={<OrganizerEventPage />} />
+              <Route path="events/:id/edit" element={<OrganizerEventFormPage mode="edit" />} />
+            </Route>
             <Route
               path="admin/*"
               element={
