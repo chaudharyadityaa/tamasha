@@ -1,6 +1,10 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, MapPin } from 'lucide-react'
-import { getOrganizerEvent } from '../api/organizer'
+import { getOrganizerEvent, listTicketTypes } from '../api/organizer'
+import type { OrganizerEvent } from '../api/organizerTypes'
+import { EventLifecycleActions } from '../components/organizer/EventLifecycleActions'
+import { OrganizerTicketTypes } from '../components/organizer/OrganizerTicketTypes'
 import { Alert } from '../components/ui/Alert'
 import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
@@ -13,25 +17,42 @@ const buttonLink =
 
 export function OrganizerEventPage() {
   const { id = '' } = useParams()
-  const validId = /^\d+$/.test(id)
-  const { data: event, loading, error, notFound } = useApiResource(getOrganizerEvent, validId ? Number(id) : null, 0)
-
-  if (!validId || notFound) {
-    return (
-      <div className="py-16 text-center">
-        <h1 className="text-2xl font-semibold text-slate-900">Event not found</h1>
-        <p className="mt-2 text-slate-600">This event does not exist, or it belongs to another organizer.</p>
-        <Link to="/organizer" className="mt-4 inline-block text-sm font-medium text-indigo-700 hover:underline">
-          Back to the dashboard
-        </Link>
-      </div>
-    )
+  if (!/^\d+$/.test(id)) {
+    return <EventNotFound />
   }
-  if (loading) {
+  // Keyed by id so moving to another event never shows the previous event's data.
+  return <EventView key={id} id={Number(id)} />
+}
+
+function EventNotFound() {
+  return (
+    <div className="py-16 text-center">
+      <h1 className="text-2xl font-semibold text-slate-900">Event not found</h1>
+      <p className="mt-2 text-slate-600">This event does not exist, or it belongs to another organizer.</p>
+      <Link to="/organizer" className="mt-4 inline-block text-sm font-medium text-indigo-700 hover:underline">
+        Back to the dashboard
+      </Link>
+    </div>
+  )
+}
+
+function EventView({ id }: { id: number }) {
+  const loaded = useApiResource(getOrganizerEvent, id, 0)
+  const [updated, setUpdated] = useState<OrganizerEvent | null>(null)
+  const [ticketReloads, setTicketReloads] = useState(0)
+  const ticketTypes = useApiResource(listTicketTypes, id, ticketReloads)
+
+  // After publish, unpublish or cancel we show the event the server returned, without another request.
+  const event = updated ?? loaded.data
+
+  if (loaded.notFound) {
+    return <EventNotFound />
+  }
+  if (loaded.loading) {
     return <Spinner label="Loading the event…" />
   }
-  if (error || !event) {
-    return <Alert variant="error">{error ?? 'The event could not be loaded.'}</Alert>
+  if (loaded.error || !event) {
+    return <Alert variant="error">{loaded.error ?? 'The event could not be loaded.'}</Alert>
   }
 
   const status = EVENT_STATUS[event.status]
@@ -61,6 +82,12 @@ export function OrganizerEventPage() {
           </Link>
         )}
       </div>
+
+      <EventLifecycleActions
+        event={event}
+        ticketTypeCount={ticketTypes.data ? ticketTypes.data.length : null}
+        onChanged={setUpdated}
+      />
 
       <dl className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
         <div className="flex gap-3">
@@ -110,9 +137,14 @@ export function OrganizerEventPage() {
         )}
       </dl>
 
-      <p className="mt-6 text-sm text-slate-500">
-        Ticket types, publishing, bookings and check-in arrive in the next updates.
-      </p>
+      <OrganizerTicketTypes
+        event={event}
+        ticketTypes={ticketTypes.data}
+        loadError={ticketTypes.error}
+        onChanged={() => setTicketReloads((count) => count + 1)}
+      />
+
+      <p className="mt-8 text-sm text-slate-500">Seats, bookings, sales numbers and check-in arrive in the next update.</p>
     </article>
   )
 }

@@ -8,7 +8,10 @@ import type {
   VenueInput,
   VenuesParams,
 } from './organizerTypes'
+import type { OrganizerTicketType, OrganizerTicketTypeInput, SeatSection } from './organizerInventoryTypes'
 import type { PageResponse } from './types'
+
+// ---------- events ----------
 
 export async function listOrganizerEvents(
   params: OrganizerEventsParams,
@@ -33,6 +36,42 @@ export async function updateEvent(id: number, input: UpdateEventInput): Promise<
   return data
 }
 
+// The server decides whether each of these is allowed and explains a refusal in its error message.
+
+export async function publishEvent(id: number): Promise<OrganizerEvent> {
+  const { data } = await http.post<OrganizerEvent>(`/api/organizer/events/${id}/publish`)
+  return data
+}
+
+export async function unpublishEvent(id: number): Promise<OrganizerEvent> {
+  const { data } = await http.post<OrganizerEvent>(`/api/organizer/events/${id}/unpublish`)
+  return data
+}
+
+/** Permanent: cancels every booking of the event, releases seats and tickets, refunds demo payments. */
+export async function cancelEvent(id: number): Promise<OrganizerEvent> {
+  const { data } = await http.post<OrganizerEvent>(`/api/organizer/events/${id}/cancel`)
+  return data
+}
+
+// ---------- ticket types ----------
+
+export async function listTicketTypes(eventId: number, signal?: AbortSignal): Promise<OrganizerTicketType[]> {
+  const { data } = await http.get<OrganizerTicketType[]>(`/api/organizer/events/${eventId}/ticket-types`, { signal })
+  return data
+}
+
+export async function createTicketType(eventId: number, input: OrganizerTicketTypeInput): Promise<OrganizerTicketType> {
+  const { data } = await http.post<OrganizerTicketType>(`/api/organizer/events/${eventId}/ticket-types`, input)
+  return data
+}
+
+export async function deleteTicketType(eventId: number, ticketTypeId: number): Promise<void> {
+  await http.delete(`/api/organizer/events/${eventId}/ticket-types/${ticketTypeId}`)
+}
+
+// ---------- venues ----------
+
 export async function listVenues(params: VenuesParams, signal?: AbortSignal): Promise<PageResponse<Venue>> {
   const { data } = await http.get<PageResponse<Venue>>('/api/organizer/venues', { params, signal })
   return data
@@ -40,5 +79,10 @@ export async function listVenues(params: VenuesParams, signal?: AbortSignal): Pr
 
 export async function createVenue(input: VenueInput): Promise<Venue> {
   const { data } = await http.post<Venue>('/api/organizer/venues', input)
+  return data
+}
+
+export async function listSeatSections(venueId: number, signal?: AbortSignal): Promise<SeatSection[]> {
+  const { data } = await http.get<SeatSection[]>(`/api/organizer/venues/${venueId}/seat-sections`, { signal })
   return data
 }

@@ -1,3 +1,4 @@
+import type { OrganizerTicketType, SeatSection } from '../api/organizerInventoryTypes'
 import type { OrganizerEvent, Venue } from '../api/organizerTypes'
 import type { PageResponse } from '../api/types'
 
@@ -32,6 +33,27 @@ export function makeOrganizerEvent(overrides: Partial<OrganizerEvent> = {}): Org
     cancellationCutoffHours: 24,
     ...overrides,
   }
+}
+
+/** A general-admission ticket type with 12 of 50 sold and no sales window. */
+export function makeTicketType(overrides: Partial<OrganizerTicketType> = {}): OrganizerTicketType {
+  return {
+    id: 1,
+    name: 'Standing',
+    price: 499.5,
+    quantityTotal: 50,
+    quantitySold: 12,
+    quantityRemaining: 38,
+    seatSection: null,
+    maxPerBooking: 4,
+    salesStart: null,
+    salesEnd: null,
+    ...overrides,
+  }
+}
+
+export function makeSeatSection(overrides: Partial<SeatSection> = {}): SeatSection {
+  return { section: 'VIP', seatCount: 30, rowCount: 3, ...overrides }
 }
 
 export function pageOf<T>(content: T[], totalElements = content.length, totalPages = 1, page = 0): PageResponse<T> {
