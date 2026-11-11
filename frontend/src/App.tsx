@@ -1,8 +1,11 @@
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth, RequireRole } from './auth/guards'
+import { AdminLayout } from './components/layout/AdminLayout'
 import { AppLayout } from './components/layout/AppLayout'
 import { AccessDeniedPage } from './pages/AccessDeniedPage'
+import { AdminDashboardPage } from './pages/AdminDashboardPage'
+import { AdminUsersPage } from './pages/AdminUsersPage'
 import { BookingPage } from './pages/BookingPage'
 import { BookingTicketsPage } from './pages/BookingTicketsPage'
 import { EventDetailPage } from './pages/EventDetailPage'
@@ -18,7 +21,6 @@ import { OrganizerEventFormPage } from './pages/OrganizerEventFormPage'
 import { OrganizerEventPage } from './pages/OrganizerEventPage'
 import { OrganizerSeatsPage } from './pages/OrganizerSeatsPage'
 import { OrganizerVenuesPage } from './pages/OrganizerVenuesPage'
-import { PlaceholderPage } from './pages/PlaceholderPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SeatSelectionPage } from './pages/SeatSelectionPage'
 
@@ -76,13 +78,16 @@ export default function App() {
               <Route path="events/:id/check-in" element={<OrganizerCheckInPage />} />
             </Route>
             <Route
-              path="admin/*"
+              path="admin"
               element={
                 <RequireRole roles={['ADMIN']}>
-                  <PlaceholderPage title="Admin dashboard" description="Platform administration arrives in a later checkpoint." />
+                  <AdminLayout />
                 </RequireRole>
               }
-            />
+            >
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="users" element={<AdminUsersPage />} />
+            </Route>
             <Route path="access-denied" element={<AccessDeniedPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
