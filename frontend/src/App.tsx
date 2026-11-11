@@ -11,9 +11,12 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyBookingsPage } from './pages/MyBookingsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { OrganizerCheckInPage } from './pages/OrganizerCheckInPage'
 import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage'
+import { OrganizerEventBookingsPage } from './pages/OrganizerEventBookingsPage'
 import { OrganizerEventFormPage } from './pages/OrganizerEventFormPage'
 import { OrganizerEventPage } from './pages/OrganizerEventPage'
+import { OrganizerSeatsPage } from './pages/OrganizerSeatsPage'
 import { OrganizerVenuesPage } from './pages/OrganizerVenuesPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -65,9 +68,12 @@ export default function App() {
             >
               <Route index element={<OrganizerDashboardPage />} />
               <Route path="venues" element={<OrganizerVenuesPage />} />
+              <Route path="venues/:id/seats" element={<OrganizerSeatsPage />} />
               <Route path="events/new" element={<OrganizerEventFormPage mode="create" />} />
               <Route path="events/:id" element={<OrganizerEventPage />} />
               <Route path="events/:id/edit" element={<OrganizerEventFormPage mode="edit" />} />
+              <Route path="events/:id/bookings" element={<OrganizerEventBookingsPage />} />
+              <Route path="events/:id/check-in" element={<OrganizerCheckInPage />} />
             </Route>
             <Route
               path="admin/*"

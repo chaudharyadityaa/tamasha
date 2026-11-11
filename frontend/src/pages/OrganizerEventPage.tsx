@@ -5,6 +5,7 @@ import { getOrganizerEvent, listTicketTypes } from '../api/organizer'
 import type { OrganizerEvent } from '../api/organizerTypes'
 import { EventLifecycleActions } from '../components/organizer/EventLifecycleActions'
 import { OrganizerTicketTypes } from '../components/organizer/OrganizerTicketTypes'
+import { SalesOverview } from '../components/organizer/SalesOverview'
 import { Alert } from '../components/ui/Alert'
 import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
@@ -14,6 +15,7 @@ import { formatDateRange } from '../lib/format'
 
 const buttonLink =
   'inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2'
+const secondaryLink = `${buttonLink} border border-slate-300 bg-white text-slate-800 hover:bg-slate-50`
 
 export function OrganizerEventPage() {
   const { id = '' } = useParams()
@@ -72,13 +74,28 @@ function EventView({ id }: { id: number }) {
 
       <div className="mt-4 flex flex-wrap gap-3">
         {event.status !== 'CANCELLED' && (
-          <Link to={`/organizer/events/${event.id}/edit`} className={`${buttonLink} border border-slate-300 bg-white text-slate-800 hover:bg-slate-50`}>
+          <Link to={`/organizer/events/${event.id}/edit`} className={secondaryLink}>
             Edit event
           </Link>
         )}
         {event.status === 'PUBLISHED' && (
           <Link to={`/events/${event.id}`} className={`${buttonLink} bg-indigo-600 text-white hover:bg-indigo-700`}>
             View public page
+          </Link>
+        )}
+        {event.status !== 'DRAFT' && (
+          <Link to={`/organizer/events/${event.id}/bookings`} className={secondaryLink}>
+            Bookings
+          </Link>
+        )}
+        {event.status === 'PUBLISHED' && (
+          <Link to={`/organizer/events/${event.id}/check-in`} className={secondaryLink}>
+            Check-in
+          </Link>
+        )}
+        {event.seatingMode === 'RESERVED_SEATING' && (
+          <Link to={`/organizer/venues/${venue.id}/seats`} className={secondaryLink}>
+            Manage venue seats
           </Link>
         )}
       </div>
@@ -137,14 +154,14 @@ function EventView({ id }: { id: number }) {
         )}
       </dl>
 
+      {event.status !== 'DRAFT' && <SalesOverview eventId={event.id} />}
+
       <OrganizerTicketTypes
         event={event}
         ticketTypes={ticketTypes.data}
         loadError={ticketTypes.error}
         onChanged={() => setTicketReloads((count) => count + 1)}
       />
-
-      <p className="mt-8 text-sm text-slate-500">Seats, bookings, sales numbers and check-in arrive in the next update.</p>
     </article>
   )
 }

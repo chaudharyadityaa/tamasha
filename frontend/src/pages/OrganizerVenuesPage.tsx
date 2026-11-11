@@ -87,13 +87,24 @@ export function OrganizerVenuesPage() {
           <ul className={`space-y-4 ${loading ? 'opacity-60 transition-opacity' : ''}`} aria-busy={loading}>
             {data.content.map((venue) => (
               <li key={venue.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <h2 className="text-lg font-semibold text-slate-900">{venue.name}</h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  {[venue.addressLine, venue.city, venue.region, venue.country].filter(Boolean).join(', ')}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  Capacity {venue.capacity} · Time zone {venue.timeZone}
-                </p>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-900">{venue.name}</h2>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {[venue.addressLine, venue.city, venue.region, venue.country].filter(Boolean).join(', ')}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Capacity {venue.capacity} · Time zone {venue.timeZone}
+                    </p>
+                  </div>
+                  <Link
+                    to={`/organizer/venues/${venue.id}/seats`}
+                    aria-label={`Manage seats at ${venue.name}`}
+                    className="text-sm font-medium text-indigo-700 hover:underline"
+                  >
+                    Manage seats
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>

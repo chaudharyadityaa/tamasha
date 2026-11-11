@@ -13,7 +13,9 @@ import {
   publishEvent,
   unpublishEvent,
 } from '../api/organizer'
+import { getEventStats } from '../api/organizerOperations'
 import { makeOrganizerEvent, makeSeatSection, makeTicketType } from '../test/organizerFixtures'
+import { makeStats } from '../test/organizerOpsFixtures'
 import { OrganizerEventPage } from './OrganizerEventPage'
 
 vi.mock('../api/organizer', () => ({
@@ -31,6 +33,15 @@ vi.mock('../api/organizer', () => ({
   createVenue: vi.fn(),
   listSeatSections: vi.fn(),
 }))
+vi.mock('../api/organizerOperations', () => ({
+  getVenue: vi.fn(),
+  createSeatBlock: vi.fn(),
+  deleteSeatSection: vi.fn(),
+  getEventStats: vi.fn(),
+  listEventBookings: vi.fn(),
+  checkInTicket: vi.fn(),
+  getAttendance: vi.fn(),
+}))
 
 function renderAt(path = '/organizer/events/7') {
   render(
@@ -46,11 +57,12 @@ const badge = (text: string) => screen.findByText(text, { selector: 'span' })
 
 describe('OrganizerEventPage', () => {
   beforeEach(() => {
-    for (const fn of [getOrganizerEvent, listTicketTypes, createTicketType, deleteTicketType, publishEvent, unpublishEvent, cancelEvent, listSeatSections]) {
+    for (const fn of [getOrganizerEvent, listTicketTypes, createTicketType, deleteTicketType, publishEvent, unpublishEvent, cancelEvent, listSeatSections, getEventStats]) {
       vi.mocked(fn).mockReset()
     }
     vi.mocked(getOrganizerEvent).mockResolvedValue(makeOrganizerEvent())
     vi.mocked(listTicketTypes).mockResolvedValue([makeTicketType()])
+    vi.mocked(getEventStats).mockResolvedValue(makeStats())
   })
 
   describe('the event', () => {
@@ -70,6 +82,34 @@ describe('OrganizerEventPage', () => {
       renderAt('/organizer/events/999')
 
       expect(await screen.findByRole('heading', { name: 'Event not found' })).toBeInTheDocument()
+    })
+  })
+
+  describe('links and sales numbers', () => {
+    it('offers no bookings, check-in or sales for a draft', async () => {
+      renderAt()
+      await screen.findByRole('heading', { name: 'Sitar Evening' })
+
+      expect(screen.queryByRole('link', { name: 'Bookings' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'Check-in' })).not.toBeInTheDocument()
+      expect(getEventStats).not.toHaveBeenCalled()
+    })
+
+    it('links a published event to its bookings and check-in, and shows its sales numbers', async () => {
+      vi.mocked(getOrganizerEvent).mockResolvedValue(makeOrganizerEvent({ status: 'PUBLISHED' }))
+      renderAt()
+
+      expect(await screen.findByRole('link', { name: 'Bookings' })).toHaveAttribute('href', '/organizer/events/7/bookings')
+      expect(screen.getByRole('link', { name: 'Check-in' })).toHaveAttribute('href', '/organizer/events/7/check-in')
+      expect(await screen.findByText(/1,998/)).toBeInTheDocument()
+      expect(getEventStats).toHaveBeenCalledWith(7, expect.any(AbortSignal))
+    })
+
+    it('offers venue seat management for reserved-seating events', async () => {
+      vi.mocked(getOrganizerEvent).mockResolvedValue(makeOrganizerEvent({ seatingMode: 'RESERVED_SEATING' }))
+      renderAt()
+
+      expect(await screen.findByRole('link', { name: 'Manage venue seats' })).toHaveAttribute('href', '/organizer/venues/1/seats')
     })
   })
 
