@@ -1,4 +1,6 @@
-import type { Role } from './types'
+import type { BookingStatus } from './bookingTypes'
+import type { EventStatus } from './organizerTypes'
+import type { Role, SeatingMode } from './types'
 
 export interface AdminUser {
   id: number
@@ -59,4 +61,53 @@ export interface AdminDashboard {
   tickets: DashboardTickets
   confirmedRevenue: RevenueLine[]
   demoPaymentsEnabled: boolean
+}
+
+/** One row of the platform-wide event list. Note: no time zone and no currency come with it. */
+export interface AdminEvent {
+  id: number
+  title: string
+  status: EventStatus
+  seatingMode: SeatingMode
+  organizerId: number
+  organizerName: string
+  venueName: string
+  city: string
+  startsAt: string
+  endsAt: string
+  startingPrice: number | null
+  createdAt: string
+}
+
+export interface AdminEventsParams {
+  status?: EventStatus
+  organizerId?: number
+  q?: string
+  /** 0-based, as the API expects. */
+  page: number
+  size: number
+}
+
+/** One row of the platform-wide booking list. Admins see the customer's name and email here. */
+export interface AdminBookingRow {
+  id: number
+  reference: string
+  status: BookingStatus
+  customerName: string
+  customerEmail: string
+  eventId: number
+  eventTitle: string
+  currency: string
+  totalAmount: number
+  createdAt: string
+  expiresAt: string
+}
+
+export interface AdminBookingsParams {
+  status?: BookingStatus
+  eventId?: number
+  q?: string
+  /** 0-based, as the API expects. */
+  page: number
+  size: number
 }

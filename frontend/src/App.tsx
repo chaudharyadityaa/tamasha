@@ -4,7 +4,10 @@ import { RequireAuth, RequireRole } from './auth/guards'
 import { AdminLayout } from './components/layout/AdminLayout'
 import { AppLayout } from './components/layout/AppLayout'
 import { AccessDeniedPage } from './pages/AccessDeniedPage'
+import { AdminBookingDetailPage } from './pages/AdminBookingDetailPage'
+import { AdminBookingsPage } from './pages/AdminBookingsPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage'
+import { AdminEventsPage } from './pages/AdminEventsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
 import { BookingPage } from './pages/BookingPage'
 import { BookingTicketsPage } from './pages/BookingTicketsPage'
@@ -87,6 +90,9 @@ export default function App() {
             >
               <Route index element={<AdminDashboardPage />} />
               <Route path="users" element={<AdminUsersPage />} />
+              <Route path="events" element={<AdminEventsPage />} />
+              <Route path="bookings" element={<AdminBookingsPage />} />
+              <Route path="bookings/:id" element={<AdminBookingDetailPage />} />
             </Route>
             <Route path="access-denied" element={<AccessDeniedPage />} />
             <Route path="*" element={<NotFoundPage />} />

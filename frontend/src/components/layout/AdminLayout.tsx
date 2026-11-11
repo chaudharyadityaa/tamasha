@@ -3,6 +3,8 @@ import { NavLink, Outlet } from 'react-router-dom'
 const ITEMS = [
   { to: '/admin', label: 'Dashboard', end: true },
   { to: '/admin/users', label: 'Users', end: false },
+  { to: '/admin/events', label: 'Events', end: false },
+  { to: '/admin/bookings', label: 'Bookings', end: false },
 ]
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
