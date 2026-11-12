@@ -2,8 +2,17 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BrandMark } from '../art/BrandMark'
 import { Navbar } from './Navbar'
 
-// These pages draw their own full-width sections. Every other page sits in a centered column.
-const FULL_WIDTH_PAGES = [/^\/$/, /^\/events$/, /^\/events\/\d+$/]
+// These pages draw their own full-width sections or frame. Every other page sits in a centered column.
+const FULL_WIDTH_PAGES = [
+  /^\/$/,
+  /^\/events$/,
+  /^\/events\/\d+$/,
+  /^\/login$/,
+  /^\/register$/,
+  /^\/my-bookings$/,
+  /^\/organizer(\/|$)/,
+  /^\/admin(\/|$)/,
+]
 
 export function AppLayout() {
   const { pathname } = useLocation()

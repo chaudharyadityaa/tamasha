@@ -1,8 +1,9 @@
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth, RequireRole } from './auth/guards'
 import { AdminLayout } from './components/layout/AdminLayout'
 import { AppLayout } from './components/layout/AppLayout'
+import { OrganizerLayout } from './components/layout/OrganizerLayout'
 import { AccessDeniedPage } from './pages/AccessDeniedPage'
 import { AdminBookingDetailPage } from './pages/AdminBookingDetailPage'
 import { AdminBookingsPage } from './pages/AdminBookingsPage'
@@ -67,7 +68,7 @@ export default function App() {
               path="organizer"
               element={
                 <RequireRole roles={['ORGANIZER']}>
-                  <Outlet />
+                  <OrganizerLayout />
                 </RequireRole>
               }
             >

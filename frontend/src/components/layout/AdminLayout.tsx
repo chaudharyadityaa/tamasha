@@ -1,34 +1,21 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
+import { WorkspaceNav } from './WorkspaceNav'
+import type { WorkspaceItem } from './WorkspaceNav'
 
-const ITEMS = [
+const ITEMS: WorkspaceItem[] = [
   { to: '/admin', label: 'Dashboard', end: true },
   { to: '/admin/users', label: 'Users', end: false },
   { to: '/admin/events', label: 'Events', end: false },
   { to: '/admin/bookings', label: 'Bookings', end: false },
 ]
 
-const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `inline-block rounded-full px-4 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-    isActive ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100'
-  }`
-
-/** The frame around every admin page: a title and the section links. */
+/** The frame around every admin page: the workspace bar, then the page in a centered column. */
 export function AdminLayout() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">Administration</h1>
-      <nav aria-label="Admin sections" className="mt-4">
-        <ul className="flex flex-wrap gap-2">
-          {ITEMS.map((item) => (
-            <li key={item.to}>
-              <NavLink to={item.to} end={item.end} className={linkClass}>
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <div className="mt-6">
+      <WorkspaceNav label="Admin" items={ITEMS} />
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <h1 className="sr-only">Administration</h1>
         <Outlet />
       </div>
     </div>

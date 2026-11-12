@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { toApiError, userMessage } from '../api/errors'
 import { useAuth } from '../auth/useAuth'
+import { AuthShell } from '../components/auth/AuthShell'
 import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { TextField } from '../components/ui/TextField'
@@ -77,11 +78,11 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
-      <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
+    <AuthShell panelTitle="Your next night out is waiting." panelText="Create an account to hold seats, book tickets and keep every ticket in one place.">
+      <h1 className="font-display text-3xl font-extrabold text-slate-900">Create your account</h1>
       <p className="mt-1 text-sm text-slate-600">It takes a minute. You can book tickets right after.</p>
 
-      <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4 rounded-xl bg-white p-6 shadow-xl ring-1 ring-black/5">
         {formError && <Alert variant="error">{formError}</Alert>}
 
         <TextField
@@ -117,7 +118,7 @@ export function RegisterPage() {
           error={errors.confirm}
         />
 
-        <Button type="submit" loading={submitting} className="w-full">
+        <Button type="submit" loading={submitting} className="w-full py-3">
           Create account
         </Button>
       </form>
@@ -128,6 +129,6 @@ export function RegisterPage() {
           Log in
         </Link>
       </p>
-    </div>
+    </AuthShell>
   )
 }
