@@ -46,12 +46,13 @@ function spokenState(state: SeatState, section: SeatMapSection): string {
   }
 }
 
+// The seats sit on a dark panel, so "available" is a soft light and "selected" is gold.
 const styles: Record<SeatState, string> = {
-  available: 'border-slate-300 bg-white text-slate-800 hover:border-indigo-500 hover:bg-indigo-50',
-  selected: 'border-indigo-700 bg-indigo-600 text-white',
-  held: 'cursor-not-allowed border-amber-300 bg-amber-100 text-amber-800',
-  booked: 'cursor-not-allowed border-slate-300 bg-slate-200 text-slate-500',
-  locked: 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400',
+  available: 'border-white/30 bg-white/10 text-white hover:border-marigold hover:bg-white/25',
+  selected: 'border-marigold bg-marigold text-midnight',
+  held: 'cursor-not-allowed border-rose/40 bg-rose/15 text-rose',
+  booked: 'cursor-not-allowed border-white/10 bg-white/5 text-white/30',
+  locked: 'cursor-not-allowed border-white/10 bg-transparent text-white/30',
 }
 
 /** Groups seats into rows, keeping the order the server sent (already sorted naturally). */
@@ -89,7 +90,7 @@ export function SeatSectionGrid({ section, currency, selectedIds, sectionRoom, o
       <div className="inline-flex min-w-full flex-col gap-1.5">
         {rows.map(([row, seats]) => (
           <div key={row} role="group" aria-label={`Row ${row}`} data-seat-row className="flex items-center gap-1.5">
-            <span className="w-8 shrink-0 text-xs font-medium text-slate-500" aria-hidden="true">
+            <span className="w-8 shrink-0 text-xs font-medium text-white/50" aria-hidden="true">
               {row}
             </span>
             {seats.map((seat) => {
@@ -112,7 +113,7 @@ export function SeatSectionGrid({ section, currency, selectedIds, sectionRoom, o
                       onToggle(seat)
                     }
                   }}
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 ${styles[state]}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-t-xl rounded-b-md border text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-midnight ${styles[state]}`}
                 >
                   {state === 'held' ? (
                     <Clock className="h-4 w-4" aria-hidden="true" />

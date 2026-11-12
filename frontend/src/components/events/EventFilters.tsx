@@ -33,7 +33,11 @@ export function EventFilters({ initial, onApply, onClear }: EventFiltersProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="rounded-xl bg-white p-5 text-slate-900 shadow-2xl ring-1 ring-black/5"
+    >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2">
           <TextField

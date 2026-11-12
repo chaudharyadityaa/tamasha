@@ -9,6 +9,7 @@ import { SeatLegend } from '../components/seats/SeatLegend'
 import { SeatSectionGrid } from '../components/seats/SeatSectionGrid'
 import { SelectedSeatsPanel } from '../components/seats/SelectedSeatsPanel'
 import type { SelectedSeat } from '../components/seats/SelectedSeatsPanel'
+import { StageBar } from '../components/seats/StageBar'
 import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
@@ -177,7 +178,7 @@ function SeatSelectionView({ id }: { id: string }) {
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back to the event
       </Link>
-      <h1 className="mt-3 text-2xl font-bold text-slate-900">Choose your seats</h1>
+      <h1 className="mt-3 font-display text-3xl font-extrabold text-slate-900 sm:text-4xl">Choose your seats</h1>
       <p className="mt-1 text-slate-600">
         {event.title} · {formatDateRange(event.startsAt, event.endsAt, event.venue.timeZone)}
       </p>
@@ -193,47 +194,49 @@ function SeatSelectionView({ id }: { id: string }) {
       </div>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-3">
-        <div className="space-y-8 lg:col-span-2">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <SeatLegend />
-            <Button variant="ghost" onClick={() => setReloads((count) => count + 1)} disabled={map.refreshing}>
-              <RefreshCw className={`h-4 w-4 ${map.refreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
-              Refresh seats
-            </Button>
+        <div className="lg:col-span-2">
+          <div className="rounded-2xl bg-midnight p-4 text-white shadow-xl sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <SeatLegend />
+              <Button variant="onDark" onClick={() => setReloads((count) => count + 1)} disabled={map.refreshing}>
+                <RefreshCw className={`h-4 w-4 ${map.refreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
+                Refresh seats
+              </Button>
+            </div>
+
+            <StageBar />
+
+            {seatMap.sections.length === 0 && <p className="mt-6 text-white/70">No seats are on sale for this event.</p>}
+
+            <div className="mt-6 space-y-10">
+              {seatMap.sections.map((section) => (
+                <section key={section.ticketTypeId} aria-labelledby={`section-${section.ticketTypeId}`}>
+                  <h2 id={`section-${section.ticketTypeId}`} className="font-display text-xl font-bold text-white">
+                    {section.name}
+                    <span className="ml-3 text-base font-normal text-white/70">
+                      {section.price === 0 ? 'Free' : formatMoney(section.price, seatMap.currency)} per seat
+                    </span>
+                  </h2>
+                  {!section.onSale && <p className="mt-1 text-sm font-medium text-marigold">Sales for this section are not open.</p>}
+                  <p className="mt-1 text-xs text-white/60">Up to {sectionCap(section)} seats per booking in this section.</p>
+                  <div className="mt-3">
+                    <SeatSectionGrid
+                      section={section}
+                      currency={seatMap.currency}
+                      selectedIds={effectiveSet}
+                      sectionRoom={sectionRoom(section)}
+                      overallRoom={overallRoom}
+                      onToggle={toggle}
+                    />
+                  </div>
+                </section>
+              ))}
+            </div>
           </div>
-
-          <div className="rounded-lg bg-slate-200 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-600">
-            Stage · front of the venue
-          </div>
-
-          {seatMap.sections.length === 0 && <p className="text-slate-600">No seats are on sale for this event.</p>}
-
-          {seatMap.sections.map((section) => (
-            <section key={section.ticketTypeId} aria-labelledby={`section-${section.ticketTypeId}`}>
-              <h2 id={`section-${section.ticketTypeId}`} className="text-lg font-semibold text-slate-900">
-                {section.name}{' '}
-                <span className="text-base font-normal text-slate-600">
-                  · {section.price === 0 ? 'Free' : formatMoney(section.price, seatMap.currency)} per seat
-                </span>
-              </h2>
-              {!section.onSale && <p className="mt-1 text-sm font-medium text-amber-700">Sales for this section are not open.</p>}
-              <p className="mt-1 text-xs text-slate-500">Up to {sectionCap(section)} seats per booking in this section.</p>
-              <div className="mt-3">
-                <SeatSectionGrid
-                  section={section}
-                  currency={seatMap.currency}
-                  selectedIds={effectiveSet}
-                  sectionRoom={sectionRoom(section)}
-                  overallRoom={overallRoom}
-                  onToggle={toggle}
-                />
-              </div>
-            </section>
-          ))}
         </div>
 
         <div className="lg:col-span-1">
-          <div className="lg:sticky lg:top-4">
+          <div className="lg:sticky lg:top-24">
             <SelectedSeatsPanel
               selected={selectedSeats}
               currency={seatMap.currency}

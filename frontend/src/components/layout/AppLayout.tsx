@@ -2,10 +2,12 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BrandMark } from '../art/BrandMark'
 import { Navbar } from './Navbar'
 
+// These pages draw their own full-width sections. Every other page sits in a centered column.
+const FULL_WIDTH_PAGES = [/^\/$/, /^\/events$/, /^\/events\/\d+$/]
+
 export function AppLayout() {
   const { pathname } = useLocation()
-  // The landing page has full-width sections of its own; every other page sits in a centered column.
-  const isHome = pathname === '/'
+  const fullWidth = FULL_WIDTH_PAGES.some((pattern) => pattern.test(pathname))
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -20,7 +22,7 @@ export function AppLayout() {
       </div>
       <main
         id="main"
-        className={isHome ? 'flex-1' : 'mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 print:max-w-none print:p-0'}
+        className={fullWidth ? 'flex-1' : 'mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 print:max-w-none print:p-0'}
       >
         <Outlet />
       </main>
