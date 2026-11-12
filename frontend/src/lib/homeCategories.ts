@@ -1,0 +1,2 @@
+/** The kinds of night shown on the home page. Each links to the events page filtered by this category. */
+export const HOME_CATEGORIES = ['Music', 'Comedy', 'Theatre', 'Sports', 'Festival', 'Workshop'] as const

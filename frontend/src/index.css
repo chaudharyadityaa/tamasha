@@ -1,1 +1,78 @@
+@import "@fontsource-variable/bricolage-grotesque/wght.css";
+@import "@fontsource-variable/figtree/wght.css";
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand colors, available as bg-midnight, text-marigold, bg-rose, ... */
+  --color-midnight: #170f2e;
+  --color-marigold: #ffb627;
+  --color-rose: #ff4d8d;
+
+  /* The brand violet replaces Tailwind's indigo, so every existing page picks it up. */
+  --color-indigo-50: #f1eeff;
+  --color-indigo-100: #e4deff;
+  --color-indigo-200: #cbbfff;
+  --color-indigo-300: #ab96ff;
+  --color-indigo-400: #8668ff;
+  --color-indigo-500: #6b45fa;
+  --color-indigo-600: #5a2fea;
+  --color-indigo-700: #4a24c4;
+  --color-indigo-800: #3c2099;
+  --color-indigo-900: #2d1a73;
+  --color-indigo-950: #1b0f47;
+
+  /* Neutrals tinted toward the brand, so greys feel part of the same palette. */
+  --color-slate-50: #f7f5fc;
+  --color-slate-100: #efecf8;
+  --color-slate-200: #e0dcef;
+  --color-slate-300: #c9c3de;
+  --color-slate-400: #9b94b8;
+  --color-slate-500: #6f6890;
+  --color-slate-600: #544e73;
+  --color-slate-700: #3f3a58;
+  --color-slate-800: #2a2640;
+  --color-slate-900: #1b1730;
+  --color-slate-950: #120e22;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--color-marigold);
+    color: var(--color-midnight);
+  }
+}
+
+/* The one piece of always-on motion: the stage lights slowly sweep. */
+@keyframes sway {
+  from {
+    transform: rotate(var(--sway-from, -3deg));
+  }
+  to {
+    transform: rotate(var(--sway-to, 3deg));
+  }
+}
+
+.beam {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: sway 9s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

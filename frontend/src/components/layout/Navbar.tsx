@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { LogOut, Menu, Ticket, X } from 'lucide-react'
+import { LogOut, Menu, X } from 'lucide-react'
 import { useAuth } from '../../auth/useAuth'
+import { BrandMark } from '../art/BrandMark'
 import { Button } from '../ui/Button'
 
 interface NavItem {
@@ -11,9 +12,12 @@ interface NavItem {
 }
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `rounded-md px-3 py-2 text-sm font-medium ${
-    isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-100'
+  `rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-marigold ${
+    isActive ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white'
   }`
+
+const signUpClass =
+  'rounded-full bg-marigold px-5 py-2 text-sm font-semibold text-midnight transition hover:brightness-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white'
 
 export function Navbar() {
   const { status, user, logout } = useAuth()
@@ -34,9 +38,9 @@ export function Navbar() {
   const account =
     status === 'authenticated' && user ? (
       <>
-        <span className="text-sm text-slate-600">Hi, {user.fullName}</span>
+        <span className="text-sm text-white/80">Hi, {user.fullName}</span>
         <Button
-          variant="secondary"
+          variant="onDark"
           onClick={() => {
             closeMenu()
             logout()
@@ -48,20 +52,23 @@ export function Navbar() {
       </>
     ) : status === 'anonymous' ? (
       <>
-        <Link to="/login" onClick={closeMenu} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+        <Link to="/login" onClick={closeMenu} className={linkClass({ isActive: false })}>
           Log in
         </Link>
-        <Link to="/register" onClick={closeMenu} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+        <Link to="/register" onClick={closeMenu} className={signUpClass}>
           Sign up
         </Link>
       </>
     ) : null
 
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-midnight/95 text-white backdrop-blur">
       <nav aria-label="Main" className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link to="/" className="flex items-center gap-2 text-lg font-bold text-indigo-700">
-          <Ticket className="h-6 w-6" aria-hidden="true" />
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 rounded-full font-display text-xl font-bold tracking-tight text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
+        >
+          <BrandMark />
           EventHub
         </Link>
 
@@ -77,7 +84,7 @@ export function Navbar() {
 
         <button
           type="button"
-          className="rounded-md p-2 text-slate-700 hover:bg-slate-100 md:hidden"
+          className="rounded-full p-2 text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-marigold md:hidden"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
@@ -88,7 +95,7 @@ export function Navbar() {
       </nav>
 
       {menuOpen && (
-        <div id="mobile-menu" className="border-t border-slate-200 px-4 py-3 md:hidden">
+        <div id="mobile-menu" className="border-t border-white/10 px-4 py-4 md:hidden">
           <div className="flex flex-col gap-1">
             {items.map((item) => (
               <NavLink key={item.to} to={item.to} end={item.end} className={linkClass} onClick={closeMenu}>
@@ -96,7 +103,7 @@ export function Navbar() {
               </NavLink>
             ))}
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3">{account}</div>
+          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">{account}</div>
         </div>
       )}
     </header>

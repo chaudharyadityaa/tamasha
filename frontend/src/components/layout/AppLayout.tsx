@@ -1,7 +1,12 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import { BrandMark } from '../art/BrandMark'
 import { Navbar } from './Navbar'
 
 export function AppLayout() {
+  const { pathname } = useLocation()
+  // The landing page has full-width sections of its own; every other page sits in a centered column.
+  const isHome = pathname === '/'
+
   return (
     <div className="flex min-h-screen flex-col">
       <a
@@ -13,11 +18,44 @@ export function AppLayout() {
       <div className="print:hidden">
         <Navbar />
       </div>
-      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 print:max-w-none print:p-0">
+      <main
+        id="main"
+        className={isHome ? 'flex-1' : 'mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 print:max-w-none print:p-0'}
+      >
         <Outlet />
       </main>
-      <footer className="border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-500 print:hidden">
-        EventHub is a portfolio project. Payments are demo only: no real money moves.
+      <footer className="bg-midnight text-white/70 print:hidden">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+          <div className="max-w-sm">
+            <div className="flex items-center gap-2.5 font-display text-lg font-bold text-white">
+              <BrandMark className="h-7 w-7" />
+              EventHub
+            </div>
+            <p className="mt-3 text-sm">Find a night out, pick your seats and carry your tickets on your phone.</p>
+          </div>
+          <nav aria-label="Footer">
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/events" className="hover:text-white">
+                  Browse events
+                </Link>
+              </li>
+              <li>
+                <Link to="/my-bookings" className="hover:text-white">
+                  My bookings
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-white">
+                  Log in
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <p className="border-t border-white/10 px-4 py-4 text-center text-xs text-white/50">
+          EventHub is a portfolio project. Payments are simulated: no real money moves.
+        </p>
       </footer>
     </div>
   )
