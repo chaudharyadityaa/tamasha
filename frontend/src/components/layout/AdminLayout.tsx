@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
+import { Spinner } from '../ui/Spinner'
 import { WorkspaceNav } from './WorkspaceNav'
 import type { WorkspaceItem } from './WorkspaceNav'
 
@@ -16,7 +18,9 @@ export function AdminLayout() {
       <WorkspaceNav label="Admin" items={ITEMS} />
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <h1 className="sr-only">Administration</h1>
-        <Outlet />
+        <Suspense fallback={<Spinner label="Loading…" />}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   )

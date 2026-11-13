@@ -8,6 +8,9 @@ if (typeof URL.createObjectURL !== 'function') {
   Object.defineProperty(URL, 'revokeObjectURL', { value: () => undefined, configurable: true, writable: true })
 }
 
+// jsdom does not implement scrolling. The route announcer scrolls to the top on navigation.
+Object.defineProperty(window, 'scrollTo', { value: () => undefined, configurable: true, writable: true })
+
 afterEach(() => {
   cleanup()
   window.sessionStorage.clear()

@@ -145,11 +145,15 @@ export function EventsPage() {
           )}
 
           {!error && data && data.content.length > 0 && (
-            <ul className={`${GRID} ${loading ? 'opacity-60 transition-opacity' : ''}`} aria-busy={loading}>
-              {data.content.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </ul>
+            <>
+              {/* Gives the event titles (h3) a parent heading, so headings never skip a level. */}
+              <h2 className="sr-only">Events</h2>
+              <ul className={`${GRID} ${loading ? 'opacity-60 transition-opacity' : ''}`} aria-busy={loading}>
+                {data.content.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </ul>
+            </>
           )}
 
           {!error && data && <Pagination page={page} totalPages={data.totalPages} onChange={goToPage} />}

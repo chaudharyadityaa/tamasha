@@ -1,6 +1,10 @@
+import { Suspense } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BrandMark } from '../art/BrandMark'
+import { Spinner } from '../ui/Spinner'
+import { ErrorBoundary } from './ErrorBoundary'
 import { Navbar } from './Navbar'
+import { RouteAnnouncer } from './RouteAnnouncer'
 
 // These pages draw their own full-width sections or frame. Every other page sits in a centered column.
 const FULL_WIDTH_PAGES = [
@@ -17,9 +21,11 @@ const FULL_WIDTH_PAGES = [
 export function AppLayout() {
   const { pathname } = useLocation()
   const fullWidth = FULL_WIDTH_PAGES.some((pattern) => pattern.test(pathname))
+  const width = fullWidth ? 'flex-1' : 'mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 print:max-w-none print:p-0'
 
   return (
     <div className="flex min-h-screen flex-col">
+      <RouteAnnouncer />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:shadow print:hidden"
@@ -29,11 +35,13 @@ export function AppLayout() {
       <div className="print:hidden">
         <Navbar />
       </div>
-      <main
-        id="main"
-        className={fullWidth ? 'flex-1' : 'mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 print:max-w-none print:p-0'}
-      >
-        <Outlet />
+      <main id="main" tabIndex={-1} className={`${width} focus:outline-none`}>
+        {/* A crash in one page must not take the navigation down, and moving to another page starts fresh. */}
+        <ErrorBoundary key={pathname}>
+          <Suspense fallback={<Spinner label="Loading…" />}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
       </main>
       <footer className="bg-midnight text-white/70 print:hidden">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between sm:px-6">
