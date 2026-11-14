@@ -27,7 +27,7 @@ jobs:
       EVENTHUB_JWT_SECRET: ci-only-secret-for-tests-not-used-anywhere-else-0123456789
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
