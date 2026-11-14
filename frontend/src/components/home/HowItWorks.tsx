@@ -1,3 +1,5 @@
+import { BRAND } from '../../lib/brand'
+
 const STEPS = [
   {
     title: 'Choose your seats or tickets',
@@ -22,9 +24,7 @@ export function HowItWorks() {
             From first look to front row
           </h2>
           <p className="mt-4 max-w-md text-slate-600">Booking takes three steps, and every one of them keeps your seat safe.</p>
-          <p className="mt-6 max-w-md text-sm text-slate-500">
-            EventHub is a portfolio project. Payments are simulated, so no real money moves.
-          </p>
+          <p className="mt-6 max-w-md text-sm text-slate-500">{BRAND.portfolioNote}</p>
         </div>
         <ol className="space-y-8">
           {STEPS.map((step, index) => (

@@ -1,6 +1,7 @@
-// First match wins, so more specific paths come before general ones.
+import { BRAND } from './brand'
+
+// First match wins, so more specific paths come before general ones. The home page has its own full title.
 const TITLES: [RegExp, string][] = [
-  [/^\/$/, 'EventHub: find your next night out'],
   [/^\/events$/, 'Events'],
   [/^\/events\/\d+\/seats$/, 'Choose your seats'],
   [/^\/events\/\d+$/, 'Event details'],
@@ -25,14 +26,14 @@ const TITLES: [RegExp, string][] = [
   [/^\/access-denied$/, 'Access denied'],
 ]
 
-const SITE = 'EventHub'
-
 /** The browser tab title for a path. Unknown paths are the "not found" page. */
 export function pageTitle(pathname: string): string {
+  if (pathname === '/') {
+    return BRAND.homeTitle
+  }
   const match = TITLES.find(([pattern]) => pattern.test(pathname))
   if (!match) {
-    return `Page not found | ${SITE}`
+    return `Page not found | ${BRAND.name}`
   }
-  const title = match[1]
-  return title.startsWith(SITE) ? title : `${title} | ${SITE}`
+  return `${match[1]} | ${BRAND.name}`
 }

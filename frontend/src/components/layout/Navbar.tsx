@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { LogOut, Menu, X } from 'lucide-react'
 import { useAuth } from '../../auth/useAuth'
+import { BRAND } from '../../lib/brand'
 import { BrandMark } from '../art/BrandMark'
 import { Button } from '../ui/Button'
 
@@ -69,7 +70,7 @@ export function Navbar() {
           className="flex items-center gap-2.5 rounded-full font-display text-xl font-bold tracking-tight text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
         >
           <BrandMark />
-          EventHub
+          {BRAND.name}
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">

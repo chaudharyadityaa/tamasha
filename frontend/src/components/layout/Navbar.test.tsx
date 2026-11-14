@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { AuthContext } from '../../auth/authContext'
 import type { AuthContextValue } from '../../auth/authContext'
+import { BRAND } from '../../lib/brand'
 import { authContext, customer } from '../../test/fixtures'
 import { Navbar } from './Navbar'
 
@@ -24,7 +25,7 @@ describe('Navbar', () => {
   it('offers Log in and Sign up to a visitor who is not signed in', () => {
     renderNavbar(authContext())
 
-    expect(screen.getByRole('link', { name: 'EventHub' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: BRAND.name })).toHaveAttribute('href', '/')
     expect(screen.getByRole('link', { name: 'Events' })).toHaveAttribute('href', '/events')
     expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
     expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register')

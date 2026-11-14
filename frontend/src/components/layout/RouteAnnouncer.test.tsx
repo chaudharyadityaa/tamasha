@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Link, MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
+import { BRAND } from '../../lib/brand'
 import { RouteAnnouncer } from './RouteAnnouncer'
 
 function renderApp() {
@@ -26,7 +27,7 @@ describe('RouteAnnouncer', () => {
   it('sets the tab title, and leaves focus alone on the first load', () => {
     renderApp()
 
-    expect(document.title).toBe('Events | EventHub')
+    expect(document.title).toBe(`Events | ${BRAND.name}`)
     expect(screen.getByRole('main')).not.toHaveFocus()
   })
 
@@ -36,7 +37,7 @@ describe('RouteAnnouncer', () => {
 
     await userEvent.setup().click(screen.getByRole('link', { name: 'Log in' }))
 
-    expect(document.title).toBe('Log in | EventHub')
+    expect(document.title).toBe(`Log in | ${BRAND.name}`)
     expect(scrollTo).toHaveBeenCalledWith(0, 0)
     expect(screen.getByRole('main')).toHaveFocus()
     scrollTo.mockRestore()

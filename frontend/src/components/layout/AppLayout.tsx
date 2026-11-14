@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { BRAND } from '../../lib/brand'
 import { BrandMark } from '../art/BrandMark'
 import { Spinner } from '../ui/Spinner'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -48,9 +49,9 @@ export function AppLayout() {
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5 font-display text-lg font-bold text-white">
               <BrandMark className="h-7 w-7" />
-              EventHub
+              {BRAND.name}
             </div>
-            <p className="mt-3 text-sm">Find a night out, pick your seats and carry your tickets on your phone.</p>
+            <p className="mt-3 text-sm">{BRAND.footerBlurb}</p>
           </div>
           <nav aria-label="Footer">
             <ul className="space-y-2 text-sm">
@@ -72,9 +73,7 @@ export function AppLayout() {
             </ul>
           </nav>
         </div>
-        <p className="border-t border-white/10 px-4 py-4 text-center text-xs text-white/50">
-          EventHub is a portfolio project. Payments are simulated: no real money moves.
-        </p>
+        <p className="border-t border-white/10 px-4 py-4 text-center text-xs text-white/50">{BRAND.portfolioNote}</p>
       </footer>
     </div>
   )
