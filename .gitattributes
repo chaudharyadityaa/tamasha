@@ -1,0 +1,7 @@
+# Keep line endings stable so scripts also work on Linux (CI, Docker, hosting platforms).
+* text=auto
+mvnw text eol=lf
+*.sh text eol=lf
+*.cmd text eol=crlf
+*.ps1 text=auto eol=crlf
+*.png binary
