@@ -6,6 +6,7 @@ import { Spinner } from '../ui/Spinner'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Navbar } from './Navbar'
 import { RouteAnnouncer } from './RouteAnnouncer'
+import { WakeUpNotice } from './WakeUpNotice'
 
 // These pages draw their own full-width sections or frame. Every other page sits in a centered column.
 const FULL_WIDTH_PAGES = [
@@ -35,6 +36,7 @@ export function AppLayout() {
       </a>
       <div className="print:hidden">
         <Navbar />
+        <WakeUpNotice />
       </div>
       <main id="main" tabIndex={-1} className={`${width} focus:outline-none`}>
         {/* A crash in one page must not take the navigation down, and moving to another page starts fresh. */}

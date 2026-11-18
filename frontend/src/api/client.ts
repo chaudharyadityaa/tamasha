@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { tokenStore } from '../auth/tokenStore'
 import { toApiError } from './errors'
+import { waitUntilReady } from './warmUp'
 
 type UnauthorizedHandler = () => void
 
@@ -17,7 +18,9 @@ export const http = axios.create({
   headers: { Accept: 'application/json' },
 })
 
-http.interceptors.request.use((config) => {
+http.interceptors.request.use(async (config) => {
+  // While a sleeping server is waking up, hold requests back instead of letting them all time out.
+  await waitUntilReady()
   const token = tokenStore.getToken()
   if (token) {
     config.headers.set('Authorization', `Bearer ${token}`)
